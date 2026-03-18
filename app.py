@@ -9,7 +9,7 @@ st.set_page_config(
 )
 
 st.title("🤖 기관 트레이딩 알고리즘 기반 S&P 500 AI 스크리너")
-st.caption("SMA200 · QQE 골든크로스 · 거래량 수급 · RSI 다이버전스 4중 필터링")
+st.caption("SMA200 · RSI 모멘텀 · 거래량 수급 · RSI 다이버전스 4중 필터링")
 st.divider()
 
 with st.sidebar:
@@ -18,11 +18,11 @@ with st.sidebar:
     max_results = st.number_input("최대 표시 종목 수", 10, 100, 30, step=5)
     st.divider()
     st.markdown("""
-    **조건 설명**
-    - SMA200 : 현재가 > 200일 이평
-    - QQE 골크 : 3일내 골든크로스
-    - 수급 1.5x : 거래량 평균 1.5배 이상
-    - RSI 다이버 : 하락 다이버전스
+**조건 설명**
+- SMA200 : 현재가 > 200일 이평선
+- RSI 모멘텀 : RSI 상승 + 50 이상
+- 수급 1.5x : 거래량 평균 1.5배 이상
+- RSI 다이버 : 하락 다이버전스
     """)
     st.warning("투자 참고용입니다. 손실 책임은 본인에게 있습니다.")
 
@@ -32,10 +32,12 @@ if st.button("시장 스캔 시작", use_container_width=True):
         market = get_market_environment()
 
     st.subheader("STEP 1 - 전체 시장 환경")
+
     c1, c2, c3 = st.columns(3)
     c1.metric("S&P 500", f"{market['close']:,.2f}")
     c2.metric("시장 추세", market['trend'])
     c3.metric("공포탐욕 지수", f"{market['fng_score']}점 ({market['fng_rating']})")
+
     st.info(f"AI 전략: {market['strategy']}")
 
     hist = market['history']
@@ -66,12 +68,13 @@ if st.button("시장 스캔 시작", use_container_width=True):
         c3.metric("3/4 우수", f"{len(results_df[results_df['만족 수']==3])}개")
 
         display_df = filtered.copy()
-for col in ['>SMA200', 'RSI 모멘텀', '수급(1.5x)', 'RSI 다이버전스']:
+        for col in ['>SMA200', 'RSI 모멘텀', '수급(1.5x)', 'RSI 다이버전스']:
             display_df[col] = display_df[col].apply(lambda v: 'O' if v else 'X')
 
         st.dataframe(display_df, use_container_width=True, height=500)
 
         csv = filtered.to_csv(index=False).encode('utf-8-sig')
         st.download_button("CSV 다운로드", csv, "screening.csv", "text/csv", use_container_width=True)
+
     else:
         st.warning("조건 2개 이상 만족 종목이 없습니다.")
