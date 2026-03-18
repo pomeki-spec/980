@@ -66,7 +66,7 @@ if st.button("시장 스캔 시작", use_container_width=True):
         c3.metric("3/4 우수", f"{len(results_df[results_df['만족 수']==3])}개")
 
         display_df = filtered.copy()
-        for col in ['>SMA200', 'QQE 골든크로스', '수급(1.5×)', 'RSI 다이버전스']:
+for col in ['>SMA200', 'RSI 모멘텀', '수급(1.5x)', 'RSI 다이버전스']:
             display_df[col] = display_df[col].apply(lambda v: 'O' if v else 'X')
 
         st.dataframe(display_df, use_container_width=True, height=500)
